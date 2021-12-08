@@ -1,0 +1,51 @@
+﻿<!-- 
+    CREATE A SHELL APPLICATION 
+    
+    1. The first step in creating a Xamarin.Forms Shell application is to add a XAML file to the shared code project that subclasses the Shell class. 
+    This file can be named anything, but AppShell is recommended. 
+    
+    2. After creating the XAML file that subclasses the Shell object (AppShell), the MainPage property of the App class should be set to the subclassed Shell object.
+    
+    3. The final step in creating a Xamarin.Forms Shell application is to describe the visual hierarchy of the application, in the subclassed Shell class
+-->
+    
+<Shell xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:views="clr-namespace:PasswordManager.Views"
+             x:Class="PasswordManager.AppShell">
+
+    <!-- Login page -->
+    <ShellItem Route="LoginPage">
+        <ShellContent ContentTemplate="{DataTemplate views:LoginPage}" />
+    </ShellItem>
+
+    <!-- 
+        A TabBar represents the bottom tab bar. 
+    -->
+    <TabBar>
+        <!-- 
+            Tab represents grouped content, navigable by bottom tabs. 
+        -->
+        <Tab Title="Ideas" Icon="lightbulb.png">
+            <!-- 
+                ShellContent represents the ContentPage object for each tab, which is a page that displays a single view. 
+            -->
+            <ShellContent
+                Route="IdeasPage"
+                ContentTemplate="{DataTemplate views:IdeasPage}" 
+            />
+        </Tab>
+        <Tab Title="Create" Icon="create.png">
+            <ShellContent
+                Route="CreatePage"
+                ContentTemplate="{DataTemplate views:CreatePage}" 
+            />
+        </Tab>
+        <Tab Title="Account" Icon="account.png">
+            <ShellContent
+                Route="AccountPage"
+                ContentTemplate="{DataTemplate views:AccountPage}" 
+            />
+        </Tab>
+    </TabBar>
+</Shell>

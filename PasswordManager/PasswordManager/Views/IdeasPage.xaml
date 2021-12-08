@@ -1,0 +1,97 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:PasswordManager.ViewModels"
+             x:Class="PasswordManager.Views.IdeasPage"
+             Shell.NavBarIsVisible="False">
+
+    <!-- 
+        Bind the view to the IdeasViewModel
+    -->
+    <ContentPage.BindingContext>
+        <vm:IdeasViewModel />
+    </ContentPage.BindingContext>
+    
+    <ContentPage.Content>
+        <StackLayout Padding="20, 20">
+            <Label 
+                Text="Your ideas"
+                FontSize="Large"
+                TextColor="Black"
+                HorizontalOptions="Center"
+            />
+
+            <!-- 
+                Enable pull to refresh.
+                Run the ReadIdeasCommand on refresh which returns a list of ideas.
+            
+                Handle the refresh state with the IsRefreshing property by binding it to IsBusy in the viewmodel. 
+                The refresh state binding is set to one-way so only the ViewModel can decide when refreshing starts and finishes.
+                The IsBusy property is set to true on refresh(when ReadIdeasCommand runs) and when the refresh completes(when ReadIdeasCommand finishes) it resets to false.
+            -->
+            <RefreshView
+                Command="{Binding ReadIdeasCommand}"
+                IsRefreshing="{Binding IsBusy, Mode=OneWay}"
+                RefreshColor="#093172">
+                
+                <!-- 
+                    Bind the collection view to the Ideas-list in the viewmodel.
+                    We can then get each object in the list and their properties which we can display inside the collection view.
+                -->
+                <CollectionView
+                    ItemsSource="{Binding Ideas}"
+                    x:Name="Ideas"
+                >
+                    <!-- Display text if list is empty -->
+                    <CollectionView.EmptyView>
+                        <StackLayout>
+                            <Label HorizontalOptions="Center" Text="No ideas created yet." />
+                        </StackLayout>
+                    </CollectionView.EmptyView>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <!-- Enable swiping on items -->
+                            <SwipeView>
+                                <!-- Swipe right to display items -->
+                                <SwipeView.RightItems>
+                                    <SwipeItems>
+                                        <!-- 
+                                            Delete button bound to the DeleteIdeaCommand in the viewmodel. 
+                                            We need to specify a path to the binding context since we are inside a collection view which is bound to a list of Idea objects. 
+                                            And the DeleteIdeaCommand is not a property of the Idea object, it's a command inside of the binding context which refers to the IdeasViewModel.
+                                            
+                                            The Source specifies that the DeleteIdeaCommand should be run on the Ideas list.
+                                        
+                                            The CommandParameter specifies which Idea object we want to delete by passing the selected object to the DeleteIdeaCommand.
+                                        -->
+                                        <SwipeItem
+                                            Command="{Binding Path=BindingContext.DeleteIdeaCommand, Source={x:Reference Ideas}}"
+                                            CommandParameter="{Binding .}"
+                                            BackgroundColor="red"
+                                            Text="Delete"
+                                            IconImageSource="trash.png">
+
+                                        </SwipeItem>
+                                    </SwipeItems>
+                                </SwipeView.RightItems>
+                                <Frame
+                                    CornerRadius="5"  
+                                    Padding="10, 10"
+                                    Margin="0, 10"
+                                    HasShadow="True"
+                                >
+                                    <StackLayout>
+                                        <!-- Display values -->
+                                        <Label Text="{Binding Title}" TextColor="Black" FontSize="Medium" />
+                                        <Label Text="{Binding Description}" FontSize="Small" />
+                                    </StackLayout>
+                                </Frame>
+                            </SwipeView>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+            </RefreshView>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>

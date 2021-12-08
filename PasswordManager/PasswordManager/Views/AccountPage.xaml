@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:PasswordManager.ViewModels"
+             x:Class="PasswordManager.Views.AccountPage"
+             Shell.NavBarIsVisible="False">
+
+    <ContentPage.BindingContext>
+        <vm:AccountViewModel />
+    </ContentPage.BindingContext>
+
+    <ContentPage.Content>
+        <StackLayout Padding="20, 0" Margin="0, 40">
+            <Frame 
+                CornerRadius="5" 
+                HasShadow="true"
+                BackgroundColor="Red"
+                Padding="10, 20"
+                Margin="0, 10"
+                IsVisible="{Binding ErrorDisplay}"
+            >
+            <Label
+                Text="{Binding ErrorMessage}"
+                FontSize="Small"
+                TextColor="White"
+            />
+            </Frame>
+            <Button
+                CornerRadius="5"
+                Text="Delete account" 
+                BackgroundColor="Red"
+                TextColor="White"
+                Command="{Binding DeleteUserCommand}"
+            />
+            <Button 
+                CornerRadius="5"
+                Text="Logout" 
+                BackgroundColor="#093172"
+                TextColor="White"
+                Command="{Binding LogoutUserCommand}"
+            />
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>
