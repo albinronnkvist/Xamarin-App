@@ -50,7 +50,7 @@ namespace PasswordManager.ViewModels
 
         private async void LogoutUser()
         {
-            // Remove the user id key
+            // Remove the user id key from secure storate
             var remove = SecureStorage.Remove("user_id");
 
             // If the key was removed
@@ -73,13 +73,14 @@ namespace PasswordManager.ViewModels
                 // Get the user id key from secure storage
                 var userId = await SecureStorage.GetAsync("user_id");
 
-                // Pass user id as an integer to the DeleteUser task
+                // Pass the user id as an integer to the DeleteUser task
                 int deleted = await UserService.DeleteUser(Convert.ToInt32(userId));
 
-                // If more than 0 rows were deleted
+                // If some rows were deleted
                 if (deleted > 0)
                 {
                     // Remove the user id key
+                    // Returns true if the key value pair was removed
                     var remove = SecureStorage.Remove("user_id");
 
                     // If the key was removed
@@ -91,7 +92,7 @@ namespace PasswordManager.ViewModels
                     else
                     {
                         ErrorDisplay = true;
-                        ErrorMessage = "Deletion succeeded but logout failed: the user id key was not removed, try restarting the application.";
+                        ErrorMessage = "Deletion succeeded but logout failed: the user id key was not removed.";
                     }
                 }
                 else

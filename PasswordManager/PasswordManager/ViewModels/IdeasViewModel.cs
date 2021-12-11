@@ -11,50 +11,6 @@ namespace PasswordManager.ViewModels
 {
     public class IdeasViewModel : BaseViewModel
     {
-        private string titleInput;
-        public string TitleInput
-        {
-            get => titleInput;
-            set
-            {
-                titleInput = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private string descriptionInput;
-        public string DescriptionInput
-        {
-            get => descriptionInput;
-            set
-            {
-                descriptionInput = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private bool successDisplay = false;
-        public bool SuccessDisplay
-        {
-            get => successDisplay;
-            set
-            {
-                successDisplay = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private string successMessage = "";
-        public string SuccessMessage
-        {
-            get => successMessage;
-            set
-            {
-                successMessage = value;
-                OnPropertyChanged();
-            }
-        }
-
         private bool errorDisplay = false;
         public bool ErrorDisplay
         {
@@ -84,38 +40,41 @@ namespace PasswordManager.ViewModels
 
 
         public IdeasViewModel()
-        {
+        {          
             Ideas = new ObservableRangeCollection<Idea>();
 
-            // Populate the collection-view onload
-            Task.Run(async () => await ReadIdeas());
+            // !!!!
+            // Problem: populate the collection view onload. For some reason this populates the list twice with duplicate items.
+            // Task.Run(() => ReadIdeas());
+            // !!!!
 
             ReadIdeasCommand = new AsyncCommand(ReadIdeas);
-            CreateIdeaCommand = new AsyncCommand(CreateIdea);
             DeleteIdeaCommand = new AsyncCommand<Idea>(DeleteIdea);
         }
 
         public ICommand ReadIdeasCommand { get; set; }
-        public ICommand CreateIdeaCommand { get; set; }
         public ICommand DeleteIdeaCommand { get; set; }
 
 
 
         private async Task ReadIdeas()
         {
-            // Mark the page as busy while we get our data
+            // Mark the page as busy while we get our data, this property is bound to the RefreshView in our view.
             IsBusy = true;
+
+            // Clear the ideas collection
+            Ideas.Clear();
 
             try
             {
+                // Get the user id value from secure storage
                 var userId = await SecureStorage.GetAsync("user_id");
 
-                await Task.Delay(500);
-
-                Ideas.Clear();
-
+                // Run the ReadIdeas task in the IdeasService and pass the current user id as a parameter.
+                // The task returns a list of idea items from the database.
                 var ideas = await IdeasService.ReadIdeas(Convert.ToInt32(userId));
 
+                // Add the list we got from the database to our Ideas ObservableRangeCollection
                 Ideas.AddRange(ideas);
             }
             catch (Exception ex)
@@ -131,51 +90,14 @@ namespace PasswordManager.ViewModels
             }
         }
 
-        private async Task CreateIdea()
-        {
-            SuccessDisplay = false;
-            SuccessMessage = "";
-            ErrorDisplay = false;
-            ErrorMessage = "";
-
-            try
-            {
-                var userId = await SecureStorage.GetAsync("user_id");
-
-                int created = await IdeasService.CreateIdea(Convert.ToInt32(userId), TitleInput, DescriptionInput);
-
-                if (created > 0)
-                {
-                    SuccessDisplay = true;
-                    SuccessMessage = "Creation succeeded: successfully created a new idea!";
-                }
-                else
-                {
-                    ErrorDisplay = true;
-                    ErrorMessage = "Creation failed: could not create a new idea.";
-                }
-
-                TitleInput = "";
-                DescriptionInput = "";
-
-                await Task.Delay(3000);
-
-                SuccessDisplay = false;
-                SuccessMessage = "";
-                ErrorDisplay = false;
-                ErrorMessage = "";
-            }
-            catch (Exception ex)
-            {
-                ErrorDisplay = true;
-                ErrorMessage = $"Creation failed: your device doesn't support secure storage. More info: {ex}";
-            }
-        }
-
         private async Task DeleteIdea(Idea idea)
         {
+            // Run the DeleteIdea task and pass the chosen object's id.
+            // This task returns the number of rows that were deleted in the database, this can be useful if you want to do some error handling. But i have decided to not do that in this case.
             await IdeasService.DeleteIdea(idea.Id);
 
+            // When the above task has finished:
+            // Run the ReadIdeas task which gets the updated list of ideas.
             await ReadIdeas();
         }
     }

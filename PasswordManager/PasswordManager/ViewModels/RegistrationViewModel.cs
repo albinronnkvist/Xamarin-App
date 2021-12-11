@@ -9,10 +9,11 @@ using Xamarin.Forms;
 
 namespace PasswordManager.ViewModels
 {
-    // I'm using MvvmHelpers with ObservableObject which implements the INotifyPropertyChanged interface that enables two-way data binding.
+    // I'm using MvvmHelpers with ObservableObject which implements the INotifyPropertyChanged interface
     public class RegistrationViewModel : ObservableObject
     {
         // User inputs are bound to these auto implemented properties
+        // They are bound to the Text property of Entry in the View, so they have a default binding mode of TwoWay which means that the View can update the ViewModel and vice-versa.
         public string UsernameInput { get; set; }
         public string PasswordInput { get; set; }
 
@@ -25,9 +26,7 @@ namespace PasswordManager.ViewModels
             set
             {
                 errorDisplay = value;
-
-                // Listen to changes on the property and automatically update the view to show the new value
-                OnPropertyChanged();
+                OnPropertyChanged(); // Listen to changes on the property and automatically update the view to show the new value
             }
         }
 
@@ -62,16 +61,19 @@ namespace PasswordManager.ViewModels
 
 
 
-        // Register a user
+        // Create an asynchronous task to order the program to run the following block of code asynchronously in the background, to not block up the main thread.
+        // We do this since we are writing to a database which can take time, and we don't want to hold up the rest of the application, including the user interface.
         private async Task RegisterUser()
         {
+            // Clear error messages
             ErrorDisplay = false;
             ErrorMessage = "";
 
-            // If user input are null, empty or whitespace
+            // If user inputs are null, empty or whitespace
             if (!String.IsNullOrWhiteSpace(UsernameInput) && !String.IsNullOrWhiteSpace(PasswordInput))
             {
-                // Run the RegisterUser task with the user inputs as parameters
+                // Run the RegisterUser task in the UserService with the user inputs as parameters
+                // The await keyword tells the program to wait for the RegisterUser-task to finish before moving onto the next line.
                 // The task returns the number of rows added to the table
                 int created = await UserService.RegisterUser(UsernameInput, PasswordInput);
 
@@ -94,10 +96,10 @@ namespace PasswordManager.ViewModels
             }
         }
 
-        private async void GotoLogin()
+        private void GotoLogin()
         {
             // Go to login page and replace the navigation stack with the LoginPage
-            await Shell.Current.GoToAsync($"//{nameof(LoginPage)}");
+            Shell.Current.GoToAsync($"//{nameof(LoginPage)}");
         }
     }
 }

@@ -13,27 +13,8 @@ namespace PasswordManager.ViewModels
 {
     public class LoginViewModel : ObservableObject
     {
-
-        // Properties
-        private string userNameInput;
-        public string UsernameInput {
-            get => userNameInput;
-            set
-            {
-                userNameInput = value;
-                OnPropertyChanged(); // Update value in view when the properties value changes
-            }
-        }
-
-        private string passwordInput;
-        public string PasswordInput {
-            get => passwordInput;
-            set
-            {
-                passwordInput = value;
-                OnPropertyChanged();
-            }
-        }
+        public string UsernameInput { get; set; }
+        public string PasswordInput { get; set; }
 
         private bool errorDisplay = false;
         public bool ErrorDisplay
@@ -56,33 +37,34 @@ namespace PasswordManager.ViewModels
             }
         }
 
+
+
         public LoginViewModel()
         {
             LoginUserCommand = new AsyncCommand(LoginUser);
             GotoRegisterUserCommand = new MvvmHelpers.Commands.Command(GotoRegisterUser);
         }
 
-
-
-        // Commands
         public ICommand LoginUserCommand { get; set; }
         public ICommand GotoRegisterUserCommand { get; set; }
 
 
 
-        // Methods
         private async Task LoginUser()
         {
+            // Remove user id from secure storage
             SecureStorage.Remove("user_id");
 
             // Reset error messages
             ErrorDisplay = false;
             ErrorMessage = "";
 
-            // The service returns a user from the database that matches the input data.
+            // Run the LoginUser task in userService and await result.
+            // The task returns a user from the database that matches the input data. Or null if there was no match.
             User user = await UserService.LoginUser(UsernameInput, PasswordInput);
 
-            // Check if we got a user from the database
+            // When we get our result back from the LoginUser task:
+            // check if we got a user from the database
             if (user != null)
             {
                 try
@@ -96,10 +78,11 @@ namespace PasswordManager.ViewModels
                         // Set root page of the application to the Appshell
                         Application.Current.MainPage = new AppShell();
 
-                        // Redirect user to ideas page and replace the navigation stack with the IdeasPage
+                        // Redirect user to IdeasPage and replace the navigation stack with the IdeasPage, so it's not possible to go back to the login page.
                         await Shell.Current.GoToAsync($"//{nameof(IdeasPage)}");
                     }
 
+                    // Clear inputs and error messages
                     UsernameInput = "";
                     PasswordInput = "";
                     ErrorDisplay = false;
@@ -111,9 +94,9 @@ namespace PasswordManager.ViewModels
                     ErrorMessage = $"Login failed: your device doesn't support secure storage. More info: {ex}";
                 }       
             }
+            // If no user matched the input data, display error messages
             else if (user == null)
             {
-                // If no user matched the input data, display error messages
                 ErrorDisplay = true;
                 ErrorMessage = "Login failed: wrong username or password.";
             }

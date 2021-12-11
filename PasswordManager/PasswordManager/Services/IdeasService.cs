@@ -42,8 +42,8 @@ namespace PasswordManager.Services
         {
             await Init();
 
-            // Get all rows where the current users id matches the foreign key "UserId" in the ideas table.
-            // Return the result as a List
+            // Get all rows where the userId parameter matches the foreign key "UserId" in the ideas table.
+            // The ToListAsync task returns the result as a List
             var ideas = await db.Table<Idea>().Where(idea => idea.UserId.Equals(userId)).ToListAsync();
 
             // Return list of ideas

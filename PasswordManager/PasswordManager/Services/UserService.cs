@@ -34,6 +34,9 @@ namespace PasswordManager.Services
 
         public static async Task<int> RegisterUser(string username, string password)
         {
+            // Init database
+            await Init();
+
             // Generate salt
             // A salt is a random byte array that is used as an additional input to a one-way hash function.
             // A different salt for each user prevents the password from having the same hashed values as other passwords, so it's more difficult to catch common passwords and you can only attack one password at a time.
@@ -47,13 +50,11 @@ namespace PasswordManager.Services
             // Generate the salted and hashed password with the password input and the randomly generated salt.
             string securePassword = SaltAndHashPassword(password, saltText);
 
-            // Init database
-            await Init();
-
             // Create a new user object with the username, generated salt and the salted+hashed password
             User user = new User(username, saltText, securePassword);
 
-            // Insert the object into the database and store the amount of rows added to the table in a variable.
+            // Insert the object into the database with the InsertAsync task
+            // This task returns the amount of rows added to the table, which we can store in a variable.
             int createdUser = await db.InsertAsync(user);
 
             // Return amount of rows added (created users)
@@ -64,8 +65,8 @@ namespace PasswordManager.Services
         {
             await Init();
 
-            // Get a user object where the input username equals a username in the database
-            // Returns null if no element was found.
+            // Get a user object from the database where the input username equals a username in the database
+            // The FirstOrDefaultAsync task returns the first element of the query, or null if no element was found.
             User user = await db.Table<User>().Where(u => u.Username.Equals(username)).FirstOrDefaultAsync();
 
             // If a user was found

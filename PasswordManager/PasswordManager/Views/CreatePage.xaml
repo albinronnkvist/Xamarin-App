@@ -6,7 +6,7 @@
              Shell.NavBarIsVisible="False">
 
     <ContentPage.BindingContext>
-        <vm:IdeasViewModel />
+        <vm:CreateViewModel />
     </ContentPage.BindingContext>
     
     <ContentPage.Content>
